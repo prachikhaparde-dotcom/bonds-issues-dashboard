@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stable Bonds #bonds-issues Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a25 100%);
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: #a0a0a0;
+        }
+
+        /* KPI Cards */
+        .kpi-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* Category Colors */
+        .cat-payment { --color: #ef4444; }
+        .cat-kyc { --color: #f97316; }
+        .cat-bank { --color: #eab308; }
+        .cat-gains { --color: #22c55e; }
+        .cat-trading { --color: #3b82f6; }
+        .cat-demat { --color: #8b5cf6; }
+        .cat-form { --color: #ec4899; }
+        .cat-system { --color: #06b6d4; }
+        .cat-account { --color: #14b8a6; }
+
+        /* Category Bar */
+        .category-breakdown {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-breakdown h3 {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .category-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .category-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .category-label {
+            min-width: 150px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: #ffffff;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .bar-count {
+            min-width: 40px;
+            text-align: right;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* Filters */
+        .filters-section {
+            margin-bottom: 30px;
+        }
+
+        .filters-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            color: #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #ffffff;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Issues Grid */
+        .issues-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .issue-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .issue-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .issue-date {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        .issue-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.4;
+        }
+
+        .issue-description {
+            font-size: 0.95rem;
+            color: #d0d0d0;
+            line-height: 1.5;
+        }
+
+        .issue-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .issue-author {
+            font-size: 0.85rem;
+            color: #a0a0a0;
+        }
+
+        .slack-link {
+            padding: 8px 12px;
+            background: #3b82f6;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .slack-link:hover {
+            background: #2563eb;
+            transform: translateX(2px);
+        }
+
+        /* No Results */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0a0a0;
+        }
+
+        .no-results p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        /* Results Info */
+        .results-info {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .kpi-section {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .issues-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-label {
+                min-width: 120px;
+                font-size: 0.85rem;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Sub-bucket styles */
+        .sub-bucket-section {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .sub-bucket-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sub-bucket-header:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .sub-bucket-header .sb-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+            color: #a0a0a0;
+        }
+
+        .sub-bucket-header.expanded .sb-icon {
+            transform: rotate(90deg);
+        }
+
+        .sub-bucket-header .sb-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            flex: 1;
+        }
+
+        .sub-bucket-header .sb-count {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #fff;
+        }
+
+        .sub-bucket-header .sb-repeat-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sub-bucket-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+            padding: 16px 0 0 0;
+        }
+
+        .sub-bucket-cards.collapsed {
+            display: none;
+        }
+
+        /* Sub-bucket breakdown inside category breakdown */
+        .sub-bucket-breakdown {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+        }
+
+        .sub-bucket-breakdown h3 {
+            font-size: 1.05rem;
+            color: #ffffff;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sub-bucket-breakdown h3 .cat-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .sb-mini-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sb-mini-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sb-mini-bar .sb-label {
+            min-width: 200px;
+            font-size: 0.85rem;
+            color: #d0d0d0;
+        }
+
+        .sb-mini-bar .sb-bar-wrap {
+            flex: 1;
+            height: 22px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .sb-mini-bar .sb-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #fff;
+            transition: width 0.5s ease;
+        }
+
+        .sb-mini-bar .sb-bar-num {
+            min-width: 30px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .sb-mini-bar .sb-label { min-width: 140px; font-size: 0.8rem; }
+            .sub-bucket-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>#bonds-issues Dashboard</h1>
+            <p>Stable Money | Feb 23 - Mar 11, 2026</p>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-section">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Issues</div>
+                <div class="kpi-value" id="totalIssues">164</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Top Category</div>
+                <div class="kpi-value" id="topCategory">Demat</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Categories</div>
+                <div class="kpi-value">9</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Date Range</div>
+                <div class="kpi-value">18 days</div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="category-breakdown">
+            <h3>Issues by Category</h3>
+            <div class="category-bars" id="categoryBars"></div>
+        </div>
+
+        <!-- Sub-Bucket Breakdown (shown when category is selected) -->
+        <div id="subBucketBreakdown" class="sub-bucket-breakdown" style="display:none;"></div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-title">Filter by Category</div>
+            <div class="filter-buttons" id="filterButtons"></div>
+            <input type="text" class="search-box" id="searchBox" placeholder="Search issues by description or user...">
+        </div>
+
+        <!-- Results Info -->
+        <div class="results-info">
+            Showing <span id="displayCount">164</span> of <span id="totalCount">164</span> issues
+        </div>
+
+        <!-- Issues Grid -->
+        <div class="issues-grid" id="issuesGrid"></div>
+        <div class="no-results" id="noResults" style="display: none;">
+            <p>No issues found matching your filters.</p>
+        </div>
+    </div>
+
+    <script>
+        // Issues data
+        const issues = [
+            { date: '2026-03-11 23:24:33', ts: '1773251673.553389', category: 'Payment & Settlement', title: 'Payment Error - CX unable to complete payment online', description: 'cx trying to make the payment its getting error Not able to do the payment online', author: 'Sanket Dhall' },
+            { date: '2026-03-11 22:18:22', ts: '1773247702.552329', category: 'Demat & CVL', title: 'NSE push not happening', description: 'nse push is not happening please check', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-11 17:48:14', ts: '1773231494.551289', category: 'Demat & CVL', title: 'Error during Demat change', description: 'While changing the Demat the user is getting this error.', author: 'Urmila K' },
+            { date: '2026-03-11 17:33:27', ts: '1773230607.550649', category: 'Demat & CVL', title: 'Check user demat holdings', description: 'HUVPM1475H- pleas let me know if there is any holding for this user in our demat', author: 'Deependra Patel' },
+            { date: '2026-03-11 17:29:45', ts: '1773230385.550359', category: 'Demat & CVL', title: 'CVL push failure', description: 'cvl push is not happening.', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-11 17:29:32', ts: '1773230372.550079', category: 'Demat & CVL', title: 'CVL push not happening', description: 'please check', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-11 16:48:08', ts: '1773227888.549579', category: 'System / API Errors', title: 'User getting error', description: '917671086969-getting this error', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-11 14:06:03', ts: '1773218163.547259', category: 'Demat & CVL', title: 'All bonds not appearing', description: 'in all bonds, all bonds are not coming. Please check.', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-11 13:45:02', ts: '1773216902.546769', category: 'Account Management', title: 'User banned unexpectedly', description: '917499491294- please check why did we ban this user', author: 'Deependra Patel' },
+            { date: '2026-03-11 13:44:57', ts: '1773216897.546459', category: 'Bank Account', title: 'IFSC code not updated in CML', description: '919503233833 user have update their IFSC code however as per the CML its still old IFSC code', author: 'Mamatha D' },
+            { date: '2026-03-11 12:58:01', ts: '1773214081.545889', category: 'Form 15G / TDS', title: 'Form 15G/H needed for FY 2026-27', description: '919101826875- need 15G/H form for the FY 2026-27', author: 'Deependra Patel' },
+            { date: '2026-03-10 20:17:30', ts: '1773153450.543619', category: 'KYC & Onboarding', title: 'Regional language characters not supported', description: 'address contains characters in a regional language that are not supported', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-10 19:55:51', ts: '1773152151.543049', category: 'KYC & Onboarding', title: 'PAN KYC internal error', description: 'PAN KYC issue at onboarding step - internal_error PAN onboarding', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-10 19:30:14', ts: '1773150614.542559', category: 'Account Management', title: 'Name change request in CDSL and KRA', description: 'please refer to this thread for the name change request in CDSL and KRA', author: 'Shubhangi Dubey' },
+            { date: '2026-03-10 17:19:13', ts: '1773142753.541659', category: 'Payment & Settlement', title: 'Payment processing issue after bank update', description: '918237291709 - user has changed the new bank info via website, but still unable to process payments', author: 'Subhash K R' },
+            { date: '2026-03-10 17:17:36', ts: '1773142656.541119', category: 'Demat & CVL', title: 'CVL push failing', description: 'cvl push is not happening please check.', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-10 17:06:05', ts: '1773141965.540799', category: 'KYC & Onboarding', title: 'PAN used by another user', description: 'can i login or create a new stable money account with abc number - PAN verified with another user?', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-10 16:37:05', ts: '1773140225.540479', category: 'Bank Account', title: 'Bank account not synced with CML', description: '918233502165 -- user bank account updated with us however as per the CML its still updated as Slice bank', author: 'Mamatha D' },
+            { date: '2026-03-10 15:21:51', ts: '1773135711.540129', category: 'System / API Errors', title: 'User unable to move forward', description: '919550251569-unable to move forward', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-10 14:59:23', ts: '1773134363.539919', category: 'System / API Errors', title: 'Onboarding dashboard not working', description: 'On boarding dashboard still not working', author: 'Md Iftekhar' },
+            { date: '2026-03-10 12:38:22', ts: '1773125902.538539', category: 'Trading & Withdrawal', title: 'Unable to cancel order', description: 'not able to cancel the order', author: 'Deependra Patel' },
+            { date: '2026-03-10 12:13:50', ts: '1773124430.538229', category: 'KYC & Onboarding', title: 'eSign verification failed', description: '919718867888 user is trying to add nominee details but getting error E sign verification failed', author: 'Faisal Khan' },
+            { date: '2026-03-10 10:55:35', ts: '1773119735.537569', category: 'System / API Errors', title: 'API call 500 error at referral', description: 'api call 500 error at referral. Please check.', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-10 10:39:56', ts: '1773118796.537159', category: 'Trading & Withdrawal', title: 'No cancel option for sell order', description: 'c64019ee- not getting an option to cancel the sell order', author: 'Deependra Patel' },
+            { date: '2026-03-10 10:33:12', ts: '1773118392.536959', category: 'System / API Errors', title: '500 error recurring for 2-3 hours', description: 'Some 500 error, recurring for last 2-3 hours.', author: 'Shivam Chandak' },
+            { date: '2026-03-10 09:39:09', ts: '1773115149.536179', category: 'Trading & Withdrawal', title: 'Trade date discrepancy', description: '918800285678 - Why the trade date for this ISIN is 10th March instead of 9th march', author: 'Mamatha D' },
+            { date: '2026-03-09 21:06:04', ts: '1773069964.533949', category: 'Payment & Settlement', title: 'Netbanking issue on app', description: '917355095188- unable to use netbanking on app but on website he can', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-09 19:43:29', ts: '1773065009.533499', category: 'System / API Errors', title: 'User unable to use app', description: '919875407174- unable to use app, not moving forward', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-09 17:54:21', ts: '1773058461.531949', category: 'KYC & Onboarding', title: 'PAN change request - wife to user', description: '918178986976 --- Please check user wife PAN was added at the time of KYC and user wants to change to his own PAN', author: 'Mamatha D' },
+            { date: '2026-03-09 17:36:39', ts: '1773057399.531439', category: 'System / API Errors', title: 'Generic error increased suddenly', description: 'This error has increased suddenly for last two days - Oops looks like something went wrong', author: 'Anmol Sinha' },
+            { date: '2026-03-09 15:13:43', ts: '1773048823.529149', category: 'Bank Account', title: 'Bank change with eSign stuck', description: '919771969240 - user has changed his bank account but ESIGN is initiated not going further', author: 'Mamatha D' },
+            { date: '2026-03-09 14:55:55', ts: '1773047755.528679', category: 'System / API Errors', title: 'Other case issue', description: 'this is the other case', author: 'Shubhangi Dubey' },
+            { date: '2026-03-09 14:40:56', ts: '1773046856.528429', category: 'KYC & Onboarding', title: 'Duplicate PAN issue', description: 'PAN - HFRPK7336L same for this user', author: 'Deependra Patel' },
+            { date: '2026-03-09 14:29:59', ts: '1773046199.527939', category: 'KYC & Onboarding', title: 'Duplicate PAN resolution needed', description: 'PAN- AWTPA6863E how do we get this resolved?', author: 'Deependra Patel' },
+            { date: '2026-03-09 14:06:51', ts: '1773044811.527559', category: 'Bank Account', title: 'Bank account update delayed', description: '919414027002 - user has changed his bank account on friday, which is not updated yet', author: 'Asha Barasakale' },
+            { date: '2026-03-09 13:15:01', ts: '1773041701.526519', category: 'System / API Errors', title: 'Dashboard not working', description: 'dashboard is not working, is there any issue going on?', author: 'Deependra Patel' },
+            { date: '2026-03-09 12:48:46', ts: '1773040126.526109', category: 'Trading & Withdrawal', title: 'Demat transfer - sell option needed', description: '919873084835 - Customer transferred Indel Money bonds from Groww to StableMoney demat, wants to sell', author: 'Rekha Lohit Kallolli' },
+            { date: '2026-03-09 12:29:35', ts: '1773038975.525749', category: 'Form 15G / TDS', title: 'Form 15G showing as Queued since March 4', description: '918142076061 - form 15G not showing successfully from march 4th, showing Queued', author: 'MISBA KHANUM' },
+            { date: '2026-03-09 09:57:13', ts: '1773029833.524759', category: 'Trading & Withdrawal', title: 'Trading banned without reason', description: '917278130803-- trading is banned no reason provided', author: 'simran taj' },
+            { date: '2026-03-09 08:36:43', ts: '1773024403.524269', category: 'Account Management', title: 'Unable to close demat account', description: '916374116821 user is unable to close demat account', author: 'simran taj' },
+            { date: '2026-03-08 19:44:14', ts: '1772977854.522889', category: 'Trading & Withdrawal', title: 'Withdrawal blocked - trading banned', description: '919899111680- unable to withdraw funds -trading banned', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-08 16:41:40', ts: '1772966900.521939', category: 'Demat & CVL', title: 'Wet signature failures increasing', description: 'Too many cases of wet sign failures.', author: 'Shivam Chandak' },
+            { date: '2026-03-08 16:34:52', ts: '1772966492.521599', category: 'Demat & CVL', title: 'Wet signature upload issue', description: '918209525905 -issue upload wet signature', author: 'Mamatha D' },
+            { date: '2026-03-08 15:44:48', ts: '1772963488.520379', category: 'Demat & CVL', title: 'Unable to complete wet signature', description: '918209525905 unable to complete wet signature', author: 'simran taj' },
+            { date: '2026-03-08 15:26:42', ts: '1772962402.519859', category: 'Demat & CVL', title: 'DDPI completion issue', description: '917021912417--unable to complete ddpi', author: 'simran taj' },
+            { date: '2026-03-08 15:13:19', ts: '1772961599.519559', category: 'Bank Account', title: 'Bank account addition error', description: '917702411121 -- getting error while adding bank account - unless demat created user cannot change bank account?', author: 'Mamatha D' },
+            { date: '2026-03-08 14:05:18', ts: '1772957518.519099', category: 'Payment & Settlement', title: 'UPI option not available', description: '918814095995 user not getting UPI option to do the payment', author: 'Faisal Khan' },
+            { date: '2026-03-08 13:31:16', ts: '1772955476.518529', category: 'Bank Account', title: 'Unable to add new bank account', description: '917061618686 User is not able to add new bank account', author: 'Faisal Khan' },
+            { date: '2026-03-08 13:17:45', ts: '1772954665.518329', category: 'System / API Errors', title: 'CVL APIs and PAN API timeout', description: 'CVL APIs were down from 12am to 10am - Pan Inquiry API timing out', author: 'Jayakar' },
+            { date: '2026-03-08 12:24:05', ts: '1772951445.517849', category: 'System / API Errors', title: 'Pre demat investment failures - 30% down', description: 'Pre demat investment ready did not happen for all users until 10am - 30% down', author: 'Anmol Sinha' },
+            { date: '2026-03-08 12:21:54', ts: '1772951314.517569', category: 'Demat & CVL', title: 'Demat creation batching issue', description: 'demat getting created in batches? Something breaking in demat creation?', author: 'Anmol Sinha' },
+            { date: '2026-03-08 11:35:31', ts: '1772948531.517109', category: 'Account Management', title: 'Demat change request status', description: 'demat change request was shared on tuesday and friday', author: 'simran taj' },
+            { date: '2026-03-07 19:50:44', ts: '1772891444.515179', category: 'Account Management', title: 'Account deletion request', description: 'help me to delete this account', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-07 19:39:57', ts: '1772890797.514919', category: 'System / API Errors', title: 'API 500 error for 3204 users', description: 'api call failed 500 errortype badresponse for 3204 users. Please check.', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-07 18:10:30', ts: '1772885430.514369', category: 'Demat & CVL', title: 'Wet signature upload issue', description: '919789460601 - issue upload wet signature', author: 'Mamatha D' },
+            { date: '2026-03-07 13:57:42', ts: '1772870262.513599', category: 'System / API Errors', title: 'CDSL possibly down', description: '919479365780 IS CDSL DOWN', author: 'BITTU SINGH' },
+            { date: '2026-03-07 11:49:52', ts: '1772862592.513129', category: 'Demat & CVL', title: 'eSign failures for users', description: 'Esign is failing for few users with this error', author: 'Anmol Sinha' },
+            { date: '2026-03-07 11:44:51', ts: '1772862291.512909', category: 'System / API Errors', title: 'Unable to add manual tag', description: 'not able to add this manual tag for bonds_high_yield_new_user', author: 'Anmol Sinha' },
+            { date: '2026-03-07 10:42:11', ts: '1772858531.512389', category: 'Demat & CVL', title: 'Demat creation failure', description: 'demat is not creating.', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-06 19:54:06', ts: '1772805246.510589', category: 'Trading & Withdrawal', title: 'Withdrawal option disabled', description: 'INE0NES07154- withdrawal option disabled', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-06 19:44:47', ts: '1772804687.510349', category: 'System / API Errors', title: 'Unable to fetch data', description: 'unable to fetch data, getting this error', author: 'Deependra Patel' },
+            { date: '2026-03-06 19:30:47', ts: '1772803847.510139', category: 'Bank Account', title: 'Unable to change bank account', description: '919685482425-unable to change bank account', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-06 19:15:34', ts: '1772802934.509879', category: 'Payment & Settlement', title: 'Unable to make payment', description: '918356939832-unable to make payment', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-06 19:06:23', ts: '1772802383.509649', category: 'Payment & Settlement', title: 'User unable to make payment', description: 'f2db2221-user is unable to make payment', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-06 17:57:27', ts: '1772798247.509219', category: 'System / API Errors', title: 'Onboarding dashboard not working', description: 'On boarding dashboard is not working', author: 'Md Iftekhar' },
+            { date: '2026-03-06 17:38:07', ts: '1772797087.508989', category: 'System / API Errors', title: 'User unable to move forward', description: '919754467888-unable to move forward', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-06 15:58:11', ts: '1772791091.508159', category: 'Form 15G / TDS', title: '15G/H form interest amount check', description: '919886363166- check the interest amount shown in the 15G/H form', author: 'Deependra Patel' },
+            { date: '2026-03-06 15:55:47', ts: '1772790947.507819', category: 'Account Management', title: 'Bank details CMR correction - Wrong MICR', description: 'Bank Details was showing Rajasthan state instead of Gujarat- CMR correction, Wrong MICR', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-06 15:09:44', ts: '1772788184.507299', category: 'Account Management', title: 'User unable to log in', description: 'c7ad3110- user unable to log in', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-06 14:41:31', ts: '1772786491.506659', category: 'Account Management', title: 'User banned status check', description: '919910054333 - user is banned please look into it', author: 'MISBA KHANUM' },
+            { date: '2026-03-06 14:20:59', ts: '1772785259.506279', category: 'Trading & Withdrawal', title: 'Withdrawal option not showing', description: '919939893479- for NAVI INE342T07668-not getting withdraw option', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-06 13:43:48', ts: '1772783028.505929', category: 'KYC & Onboarding', title: 'DigiLocker 9-digit instead of 12-digit', description: '917780708922 - cx is trying to do the kyc - Digi locker asking only 9 digit number instead of 12 digit', author: 'MISBA KHANUM' },
+            { date: '2026-03-06 13:23:10', ts: '1772781790.505669', category: 'KYC & Onboarding', title: 'Aadhaar field shows 9 digits instead of 12', description: '919346369515-user getting only 9 digit to fill instead of 12 -Aadhaar', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-06 13:00:34', ts: '1772780434.505459', category: 'KYC & Onboarding', title: 'KYC email sent but already completed', description: '919448735444--- user is getting this email but his kyc is completed', author: 'simran taj' },
+            { date: '2026-03-05 16:19:32', ts: '1772706172.502879', category: 'KYC & Onboarding', title: 'Name mismatch - no approval option', description: '919110230912- there is name mismatch, not getting option to approve', author: 'Deependra Patel' },
+            { date: '2026-03-05 14:59:03', ts: '1772701343.502499', category: 'Trading & Withdrawal', title: 'Withdrawal option not showing', description: '917001271437 - cx is not getting the withdrawal option, invested on 20th feb', author: 'MISBA KHANUM' },
+            { date: '2026-03-05 13:24:07', ts: '1772695447.501689', category: 'Demat & CVL', title: 'Demat not getting created', description: 'demat is not getting created', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-05 13:16:23', ts: '1772694983.501559', category: 'System / API Errors', title: 'App crashing on open', description: '917975181975 user is facing issue in the application after opening the app it coming back', author: 'Faisal Khan' },
+            { date: '2026-03-05 13:06:53', ts: '1772694413.501219', category: 'Account Management', title: 'CDSL portal password reset', description: '919760135839 user want to reset his password on cdsl portal', author: 'farha' },
+            { date: '2026-03-05 12:14:43', ts: '1772691283.500689', category: 'KYC & Onboarding', title: 'PAN pending from CVL', description: 'AEGPB7269G ANCPJ5783G both pending from cvl please check on priority', author: 'BITTU SINGH' },
+            { date: '2026-03-05 12:13:16', ts: '1772691196.500489', category: 'Gains & Portfolio Display', title: 'Incorrect payout display', description: '917001599211 user has got the principal amount on June 2025 and Dev 2025 However it is still reflecting in his payouts showing 98,307 instead of 33,334', author: 'Faisal Khan' },
+            { date: '2026-03-05 12:04:25', ts: '1772690665.500179', category: 'Form 15G / TDS', title: 'Form 15G submit button inactive', description: '916363409662 post 15g submission submit button is not active', author: 'simran taj' },
+            { date: '2026-03-05 11:45:44', ts: '1772689544.499899', category: 'KYC & Onboarding', title: 'Duplicate Aadhaar for KYC', description: '919953125050 user getting error using same Aadhar for KYC', author: 'Faisal Khan' },
+            { date: '2026-03-05 11:37:18', ts: '1772689038.499449', category: 'KYC & Onboarding', title: 'Name mismatch with ITD', description: '919844427624- name as per ITD is different from what we are fetching', author: 'Deependra Patel' },
+            { date: '2026-03-05 11:30:47', ts: '1772688647.499159', category: 'Payment & Settlement', title: 'Netbanking payment failure', description: '918971014256 - Paying for bonds via netbanking, transaction is failing (Bank asked to add payee)', author: 'Mohal Juneja' },
+            { date: '2026-03-05 10:31:27', ts: '1772685087.498639', category: 'Account Management', title: 'CDSL authentication pending', description: '919833047446 user is unable to see his details in CDSL, showing authentication is pending by DP', author: 'Faisal Khan' },
+            { date: '2026-03-05 09:02:25', ts: '1772679745.498079', category: 'Payment & Settlement', title: 'Settlement delayed - March 4', description: '919741028094--- yesterday was the settlement day march 4th but not yet settled', author: 'simran taj' },
+            { date: '2026-03-05 08:52:54', ts: '1772679174.497819', category: 'Payment & Settlement', title: 'Settlement not completed', description: '918369198664 - yesterday was the settlement day march 4th but not yet settled', author: 'MISBA KHANUM' },
+            { date: '2026-03-05 08:44:23', ts: '1772678663.497499', category: 'Bank Account', title: 'Bank account not reflecting in dashboard', description: '919904169724 - trying to add bank a/c from website, not reflecting in dashboard', author: 'MISBA KHANUM' },
+            { date: '2026-03-05 08:28:35', ts: '1772677715.497229', category: 'Gains & Portfolio Display', title: 'Gains not reflecting for 8 days', description: '918810899067 - past 8 days customer gains not reflecting, user has updated the app', author: 'MISBA KHANUM' },
+            { date: '2026-03-04 22:15:42', ts: '1772640942.496479', category: 'KYC & Onboarding', title: 'Aadhaar-PAN match verification error', description: 'Error in Aadhaar-PAN match verification - AADHAAR_BANK_PAN_MATCH_ERROR', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-04 18:00:36', ts: '1772625636.495389', category: 'Trading & Withdrawal', title: 'Transferred bonds - sell option needed', description: 'User previously held bonds in a different broker demat, transferred to our demat, requesting sell option', author: 'Mamatha D' },
+            { date: '2026-03-04 17:24:20', ts: '1772623460.494949', category: 'KYC & Onboarding', title: 'Unable to approve KYC status', description: '919844427624- I\'m trying to approve the status but not happening', author: 'Deependra Patel' },
+            { date: '2026-03-04 13:08:05', ts: '1772608085.493259', category: 'Trading & Withdrawal', title: 'No cancel option for order', description: 'not getting an option to cancel the order', author: 'Deependra Patel' },
+            { date: '2026-03-04 12:14:02', ts: '1772604842.492959', category: 'Account Management', title: 'Unable to download CMR', description: '919628248800 -- user is not able to download the CMR copy from our website', author: 'Mamatha D' },
+            { date: '2026-03-04 10:55:30', ts: '1772600130.492679', category: 'System / API Errors', title: 'First time user issue', description: '918972165143 -- user says he is using it for first time', author: 'simran taj' },
+            { date: '2026-03-04 10:40:38', ts: '1772599238.492329', category: 'System / API Errors', title: 'Invalid transaction from website', description: '918360348366 user is unable to get transaction from website, shows invalid', author: 'simran taj' },
+            { date: '2026-03-03 15:29:38', ts: '1772530178.490539', category: 'System / API Errors', title: 'Check this case', description: 'bedf40da- check this one', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-03 14:03:55', ts: '1772525035.490049', category: 'Form 15G / TDS', title: 'TDS not showing in 26AS from November', description: '917002931659 user said that TDS is not showing in 26AS form from Nov month', author: 'Faisal Khan' },
+            { date: '2026-03-03 11:20:18', ts: '1772515218.489319', category: 'System / API Errors', title: 'Funnel is down', description: 'Funnel is down', author: 'Shivam Chandak' },
+            { date: '2026-03-03 11:13:55', ts: '1772514835.488949', category: 'System / API Errors', title: 'Demat screen showing in staging', description: 'seeing demat screen in staging. Are we showing in prod as well?', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-03 10:28:36', ts: '1772512116.488459', category: 'Gains & Portfolio Display', title: 'Gains reflecting incorrectly', description: '917280021888-- gains are reflecting incorrect as per cx voc', author: 'simran taj' },
+            { date: '2026-03-03 10:15:09', ts: '1772511309.488199', category: 'Gains & Portfolio Display', title: 'Gains decreased unexpectedly', description: '919958492116 - yesterday cx gain was 1800 and today its showing less', author: 'MISBA KHANUM' },
+            { date: '2026-03-02 19:06:04', ts: '1772456764.486609', category: 'Account Management', title: 'Account deletion confirmed', description: '5ac9a4e7- delete this account (user confirmation)', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-02 18:35:10', ts: '1772454910.486339', category: 'Account Management', title: 'Lost mobile - login issue', description: '139ed9ca- user lost his mobile, trying to log in using same number, shows error', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-03-02 18:02:10', ts: '1772452930.486019', category: 'Trading & Withdrawal', title: 'Enable eCAS for user', description: '918884434566- please enable ecas', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-02 17:54:21', ts: '1772452461.485559', category: 'Trading & Withdrawal', title: 'Trading banned from NSE', description: '918840857905 -- trade banned from NSE', author: 'Mamatha D' },
+            { date: '2026-03-02 16:18:01', ts: '1772446681.485079', category: 'Bank Account', title: 'Bank update not synced', description: '918802080426 - user has updated the bank account via website, but still not updated', author: 'Subhash K R' },
+            { date: '2026-03-02 13:07:21', ts: '1772435241.484149', category: 'System / API Errors', title: 'Duplicate onboarding events', description: 'Sudden spike in onboarding completions - possible duplicate event', author: 'Prachi Arun Khaparde' },
+            { date: '2026-03-02 13:03:09', ts: '1772434989.483859', category: 'Bank Account', title: 'Unable to add bank', description: '916379491243- unable to add bank', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-02 13:02:53', ts: '1772434973.483589', category: 'Form 15G / TDS', title: 'Form 15G/H bulk submission needed', description: 'Can we populate all the 15G/H forms along with list of investors and share with Midland?', author: 'Kushagra Gupta' },
+            { date: '2026-03-02 12:59:47', ts: '1772434787.483299', category: 'Payment & Settlement', title: 'Verification refund pending', description: '918420010210 - Rs 1 was debited for verification on 22/02, refund still pending', author: 'Mamatha D' },
+            { date: '2026-03-02 12:40:44', ts: '1772433644.483009', category: 'Account Management', title: 'DP ID showing wrong name', description: '918933046909 DP id showing as suresh rathi Securities pvt. Ltd', author: 'Mamatha D' },
+            { date: '2026-03-02 09:44:52', ts: '1772422692.481529', category: 'Gains & Portfolio Display', title: 'Incorrect gains in app', description: '919910728389 incorrect gains reflecting in app', author: 'simran taj' },
+            { date: '2026-03-01 20:31:50', ts: '1772374910.480409', category: 'Trading & Withdrawal', title: 'Settlement status not updated', description: '918609744276 user placed sell order settlement date was 25th feb but still status not updated', author: 'simran taj' },
+            { date: '2026-03-01 19:01:00', ts: '1772369460.479889', category: 'Trading & Withdrawal', title: 'User banned from trading', description: '919023871096 - user wants to invest, but he has been banned from trading', author: 'Asha Barasakale' },
+            { date: '2026-03-01 17:24:40', ts: '1772363680.479289', category: 'Payment & Settlement', title: 'Unable to proceed with payment', description: '919030986555-unable to proceed with the payment', author: 'Kumar Sunny Anand' },
+            { date: '2026-03-01 08:55:28', ts: '1772333128.478679', category: 'Demat & CVL', title: 'DDPI completion blocked', description: '919560474312 -- unable to complete DDPI from yesterday', author: 'Mamatha D' },
+            { date: '2026-02-28 18:46:52', ts: '1772282212.477129', category: 'Payment & Settlement', title: 'Order cancelled after payment - refund pending', description: '93314bdf- ISIN-INE342T07544 ORDER CANCELLED after payment success, refund pending', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-02-28 16:14:27', ts: '1772272867.476059', category: 'Demat & CVL', title: 'Demat creation failure', description: 'Demat is not getting created', author: 'Prachi Arun Khaparde' },
+            { date: '2026-02-28 15:53:23', ts: '1772271603.475729', category: 'Account Management', title: 'PAN marked as #No CAS# causing issues', description: '918652107371 - Stable Broking has marked PAN as #No CAS# causing NSDL CAS issues', author: 'simran taj' },
+            { date: '2026-02-28 15:34:38', ts: '1772270478.475389', category: 'System / API Errors', title: 'Broking server error - 75 users', description: 'broking server error 75 users please check', author: 'Prachi Arun Khaparde' },
+            { date: '2026-02-28 13:27:51', ts: '1772262471.473229', category: 'KYC & Onboarding', title: 'Unable to verify KYC steps', description: '919844427624 - Unable to verify the KYC steps', author: 'Subhash K R' },
+            { date: '2026-02-28 11:30:44', ts: '1772255444.472919', category: 'System / API Errors', title: 'Unable to click on proceed', description: '918977331204 - Unable to click on proceed', author: 'Mohal Juneja' },
+            { date: '2026-02-27 18:40:54', ts: '1772194854.470879', category: 'System / API Errors', title: 'User unable to proceed', description: '919382897049-unable to proceed', author: 'Kumar Sunny Anand' },
+            { date: '2026-02-27 14:10:23', ts: '1772178623.469829', category: 'KYC & Onboarding', title: 'Corporation or corporation spelling', description: '917049323290-Corporation or corporatioin?', author: 'Kumar Sunny Anand' },
+            { date: '2026-02-27 13:31:03', ts: '1772176263.469469', category: 'Demat & CVL', title: 'Unable to get OTP for DDPI', description: '918866112450 - unable to get otp to complete DDPI', author: 'Mamatha D' },
+            { date: '2026-02-27 11:43:09', ts: '1772169789.469169', category: 'System / API Errors', title: 'User unable to proceed', description: '919724060305 not able to proceed further', author: 'simran taj' },
+            { date: '2026-02-27 11:25:23', ts: '1772168723.468849', category: 'System / API Errors', title: 'Tag not getting created for ISIN', description: 'Please check this, tag not getting created for ISIN: INE0BUS07BO4', author: 'Punith' },
+            { date: '2026-02-27 11:20:24', ts: '1772168424.468569', category: 'Account Management', title: 'No OTP for StableBonds login', description: '918866112450 - trying to log into Stablebonds.in, not receiving OTP', author: 'Mohal Juneja' },
+            { date: '2026-02-27 11:17:11', ts: '1772168231.468389', category: 'Bank Account', title: 'HUF bank account addition error', description: '919540106527 - Saurabh Mahajan HUF - Unable to add bank account', author: 'Mohal Juneja' },
+            { date: '2026-02-27 10:51:53', ts: '1772166713.467619', category: 'Bank Account', title: 'Unable to add bank details', description: '919346227462 user is unable to add bank details', author: 'simran taj' },
+            { date: '2026-02-26 22:46:15', ts: '1772123175.466669', category: 'Trading & Withdrawal', title: 'Sell order rejected', description: '9c066f65- sell order rejected', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-02-26 18:22:38', ts: '1772107358.465539', category: 'Payment & Settlement', title: 'Bond settlement delayed - promised Feb 24', description: '18df2407- bond not yet settled as promised by Feb 24', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-02-26 15:58:46', ts: '1772098726.465299', category: 'KYC & Onboarding', title: 'Invalid VID number error', description: '919407629981 user is facing KYC issue -- error showing invalid VID number', author: 'Faisal Khan' },
+            { date: '2026-02-26 15:53:31', ts: '1772098411.464859', category: 'System / API Errors', title: 'Onboarding dashboard down past week', description: 'Not able to use the onboarding dashboard from past week', author: 'Rekha Lohit Kallolli' },
+            { date: '2026-02-26 12:36:09', ts: '1772086569.463739', category: 'Trading & Withdrawal', title: 'Order cancelled without user request', description: '916374330700 user has not made a request for cancel his investment but showing cancelled as per user request', author: 'Faisal Khan' },
+            { date: '2026-02-26 12:33:20', ts: '1772086400.463469', category: 'Payment & Settlement', title: 'Order cancelled before settlement', description: '916374330700 Customer placed order on 25th Feb, bond not settled, status showing cancelled', author: 'Rekha Lohit Kallolli' },
+            { date: '2026-02-26 10:31:29', ts: '1772079089.462399', category: 'Demat & CVL', title: 'eSign completion blocked', description: '919550112750 -- customer is unable to complete his esign', author: 'Mamatha D' },
+            { date: '2026-02-26 09:17:14', ts: '1772074634.462139', category: 'Demat & CVL', title: 'DDPI already completed but showing message', description: '919702769137 user has completed ddpi but still getting message to complete ddpi', author: 'simran taj' },
+            { date: '2026-02-25 20:16:12', ts: '1772027772.460639', category: 'Demat & CVL', title: 'Demat pushed but not created', description: 'demat pushed but demat is not done. Please check.', author: 'Prachi Arun Khaparde' },
+            { date: '2026-02-25 20:12:36', ts: '1772027556.460449', category: 'Bank Account', title: 'Unable to add 3rd bank account', description: '918928990970 user not able to add 3rd bank account, getting error', author: 'BITTU SINGH' },
+            { date: '2026-02-25 16:37:19', ts: '1772014639.460089', category: 'Gains & Portfolio Display', title: 'Gains showing in minus', description: '919971859195 - cx gains is showing in minus', author: 'MISBA KHANUM' },
+            { date: '2026-02-25 16:25:23', ts: '1772013923.459839', category: 'Trading & Withdrawal', title: 'Share order receipts needed', description: '9831026261 - share order receipts for INE109C07139', author: 'Mamatha D' },
+            { date: '2026-02-25 16:13:30', ts: '1772013210.459459', category: 'Gains & Portfolio Display', title: 'Net worth discrepancy', description: '919962249801- Same net worth discrepancy as reported earlier', author: 'Mohal Juneja' },
+            { date: '2026-02-25 14:47:48', ts: '1772008068.459109', category: 'Gains & Portfolio Display', title: 'Sell order amount mismatch', description: '919505002600 user sell amount showing 5,309 but order receipt shows 5,089', author: 'Faisal Khan' },
+            { date: '2026-02-25 12:20:11', ts: '1771999211.457989', category: 'Payment & Settlement', title: 'Interest payment returned - VIJAY K MULAY', description: 'Choice has processed interest payment and amt is returned back for VIJAY K MULAY', author: 'Kushagra Gupta' },
+            { date: '2026-02-25 12:12:25', ts: '1771998745.457659', category: 'Gains & Portfolio Display', title: 'Negative gains displayed', description: '919872431245 -- showing negative gains', author: 'Mamatha D' },
+            { date: '2026-02-25 12:10:02', ts: '1771998602.457299', category: 'Trading & Withdrawal', title: 'Maturity date vs payout schedule mismatch', description: '917905106846--Maturity date is Dec 26, 2027 but payout schedule showing only Feb', author: 'Rekha Lohit Kallolli' },
+            { date: '2026-02-25 11:14:34', ts: '1771995274.457009', category: 'Gains & Portfolio Display', title: 'Negative net worth displayed', description: '918427542337 - User is seeing negative networth', author: 'Mohal Juneja' },
+            { date: '2026-02-25 11:06:47', ts: '1771994807.456719', category: 'Gains & Portfolio Display', title: 'Gains showing negative for bonds', description: '919999873768 - gains showing in minus for muthoot bonds', author: 'MISBA KHANUM' },
+            { date: '2026-02-25 10:59:46', ts: '1771994386.456479', category: 'Trading & Withdrawal', title: 'Need Retool access for debugging', description: '917046756056 please give access for retool to check reason for not getting sell option', author: 'Mamatha D' },
+            { date: '2026-02-25 10:23:11', ts: '1771992191.456199', category: 'Gains & Portfolio Display', title: 'Negative gains for bonds', description: '917385745128 - gains showing in minus for muthoot bonds', author: 'MISBA KHANUM' },
+            { date: '2026-02-24 20:53:07', ts: '1771943587.455579', category: 'Gains & Portfolio Display', title: 'Negative gains', description: '919503456560- -ve gains', author: 'Kumar Sunny Anand' },
+            { date: '2026-02-24 19:38:01', ts: '1771939081.455309', category: 'System / API Errors', title: 'Bonds HP layout issue', description: 'Bonds HP is loading with a large gap between masthead and secondary nav', author: 'Anurag Mohanan' },
+            { date: '2026-02-24 16:25:23', ts: '1771927523.454269', category: 'Trading & Withdrawal', title: 'No withdrawal option for ISIN', description: '888699b5-INE0NES07188-not getting withdrawal option', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-02-24 15:35:23', ts: '1771924523.453789', category: 'Gains & Portfolio Display', title: 'Negative value display issue', description: '720e6670- fix this issue, we are showing -ve value', author: 'MANAS RANJAN NAHAK' },
+            { date: '2026-02-24 15:26:52', ts: '1771924012.453459', category: 'Trading & Withdrawal', title: 'Withdrawal option blocked - ISIN issue', description: '918076880909 -- unable to get withdraw option - ISIN - INE0NES07188', author: 'Mamatha D' },
+            { date: '2026-02-24 14:38:21', ts: '1771921101.452529', category: 'Demat & CVL', title: 'Demat creation failure', description: 'demat is not getting created. Please check', author: 'Prachi Arun Khaparde' },
+            { date: '2026-02-24 11:39:00', ts: '1771910340.451829', category: 'Bank Account', title: 'Fetching wrong bank info', description: '919322229073 - user trying to add individual bank account, fetching another person\'s bank info', author: 'Subhash K R' },
+            { date: '2026-02-24 09:32:24', ts: '1771902744.451529', category: 'Gains & Portfolio Display', title: 'Difference in returns', description: '918175875253 - there is a difference in returns', author: 'MISBA KHANUM' },
+            { date: '2026-02-23 19:46:00', ts: '1771853160.450529', category: 'Gains & Portfolio Display', title: 'Gains count mismatch', description: '917001271437-its showing 24, it is 25 total-gains', author: 'Kumar Sunny Anand' },
+            { date: '2026-02-23 17:01:07', ts: '1771843267.449759', category: 'Trading & Withdrawal', title: 'Withdraw option missing - no debugging info', description: '919686956569 -- unable to get withdraw option, not getting any reason in retool', author: 'Mamatha D' },
+            { date: '2026-02-23 13:36:55', ts: '1771831015.448759', category: 'Gains & Portfolio Display', title: 'Gains static for one week', description: '919910728389 --My gains figure is static for around last one week', author: 'Mamatha D' }
+        ];
+
+        // Category colors mapping
+        const categoryColors = {
+            'Payment & Settlement': '#ef4444',
+            'KYC & Onboarding': '#f97316',
+            'Bank Account': '#eab308',
+            'Gains & Portfolio Display': '#22c55e',
+            'Trading & Withdrawal': '#3b82f6',
+            'Demat & CVL': '#8b5cf6',
+            'Form 15G / TDS': '#ec4899',
+            'System / API Errors': '#06b6d4',
+            'Account Management': '#14b8a6'
+        };
+
+        // ─── Sub-bucket classification rules ───
+        const subBucketRules = {
+            'Payment & Settlement': [
+                { name: 'Payment Failure / Error', keywords: ['payment', 'unable to pay', 'unable to make payment', 'not able to do the payment', 'unable to proceed with the payment', 'transaction is failing', 'netbanking'] },
+                { name: 'Settlement Delay', keywords: ['settlement', 'not yet settled', 'settled'] },
+                { name: 'UPI / Payment Method', keywords: ['upi', 'upi option'] },
+                { name: 'Refund Pending', keywords: ['refund', 'reversed', 'cancelled after payment', 'debited', 'verification'] },
+                { name: 'Interest / Payout Return', keywords: ['interest payment', 'returned back'] },
+            ],
+            'KYC & Onboarding': [
+                { name: 'PAN Issues', keywords: ['pan', 'pan kyc', 'duplicate pan', 'pan onboarding', 'pan verified with another'] },
+                { name: 'Aadhaar / DigiLocker', keywords: ['aadhaar', 'aadhar', 'digilocker', 'digi locker', '9 digit', '12 digit', 'vid number'] },
+                { name: 'eSign Failure', keywords: ['esign', 'e sign', 'e-sign'] },
+                { name: 'Name Mismatch', keywords: ['name mismatch', 'name as per itd', 'name change', 'corporation'] },
+                { name: 'Address / Regional Language', keywords: ['address', 'regional language'] },
+                { name: 'KYC Verification Error', keywords: ['kyc', 'verify', 'onboarding', 'approve'] },
+            ],
+            'Bank Account': [
+                { name: 'Bank Update Not Synced', keywords: ['not updated', 'not synced', 'still old', 'still updated as', 'cml', 'ifsc', 'not reflecting'] },
+                { name: 'Unable to Add Bank', keywords: ['unable to add', 'not able to add', 'add bank', 'add new bank', 'bank details'] },
+                { name: 'Bank Change / eSign Stuck', keywords: ['esign', 'change', 'changed'] },
+                { name: 'Wrong Bank Info Fetched', keywords: ['fetching', 'wrong', 'another person'] },
+            ],
+            'Gains & Portfolio Display': [
+                { name: 'Negative / Minus Gains', keywords: ['negative', 'minus', '-ve', 'in minus'] },
+                { name: 'Incorrect Gains', keywords: ['incorrect', 'difference', 'discrepancy', 'mismatch', 'showing less', 'showing 24'] },
+                { name: 'Gains Not Updating', keywords: ['static', 'not reflecting', 'not updating', '8 days'] },
+                { name: 'Payout / Net Worth Display', keywords: ['payout', 'net worth', 'networth', 'sell amount'] },
+            ],
+            'Trading & Withdrawal': [
+                { name: 'Trading Banned', keywords: ['banned', 'trade banned'] },
+                { name: 'Withdrawal Option Missing', keywords: ['withdraw', 'withdrawal option', 'not getting withdraw', 'sell option'] },
+                { name: 'Order Cancellation Issues', keywords: ['cancel', 'cancelled'] },
+                { name: 'Sell Order / Settlement', keywords: ['sell order', 'settlement', 'rejected', 'status not updated'] },
+                { name: 'Other Trading', keywords: ['ecas', 'receipts', 'maturity', 'retool', 'trade date'] },
+            ],
+            'Demat & CVL': [
+                { name: 'Demat Creation Failure', keywords: ['demat is not', 'demat not', 'demat creation', 'demat getting created', 'demat pushed'] },
+                { name: 'CVL / NSE Push Failure', keywords: ['cvl', 'nse push', 'cvl push'] },
+                { name: 'Wet Signature Issues', keywords: ['wet sign', 'wet signature'] },
+                { name: 'DDPI Issues', keywords: ['ddpi'] },
+                { name: 'eSign / CDSL Issues', keywords: ['esign', 'cdsl', 'cdsl down', 'demat change', 'all bonds'] },
+            ],
+            'Form 15G / TDS': [
+                { name: 'Form 15G Submission Error', keywords: ['submission', 'submit', 'queued', 'submit button', 'not showing successfully'] },
+                { name: 'TDS / 26AS Issues', keywords: ['tds', '26as'] },
+                { name: 'Interest Amount Mismatch', keywords: ['interest', 'amount'] },
+                { name: 'Bulk 15G/H Processing', keywords: ['populate', 'bulk', 'midland', '15g/h form'] },
+            ],
+            'System / API Errors': [
+                { name: '500 / API Errors', keywords: ['500', 'api', 'badresponse', 'server error'] },
+                { name: 'Dashboard Not Working', keywords: ['dashboard', 'onboarding dashboard'] },
+                { name: 'App Crash / Unable to Proceed', keywords: ['unable to proceed', 'unable to move', 'not moving', 'unable to use app', 'coming back', 'unable to click', 'not able to proceed'] },
+                { name: 'Funnel / System Down', keywords: ['funnel', 'down', 'staging'] },
+                { name: 'Other System Issues', keywords: ['tag', 'duplicate', 'error', 'fetch'] },
+            ],
+            'Account Management': [
+                { name: 'User Banned', keywords: ['banned', 'ban'] },
+                { name: 'Account Deletion', keywords: ['delete', 'close demat'] },
+                { name: 'Login / OTP Issues', keywords: ['login', 'log in', 'otp', 'password', 'lost mobile'] },
+                { name: 'CDSL / CMR Issues', keywords: ['cdsl', 'cmr', 'dp id', 'cas', 'authentication'] },
+                { name: 'Name / Account Modification', keywords: ['name change', 'demat change'] },
+            ]
+        };
+
+        function getSubBucket(issue) {
+            const rules = subBucketRules[issue.category];
+            if (!rules) return 'Other';
+            const text = (issue.title + ' ' + issue.description).toLowerCase();
+            for (const rule of rules) {
+                if (rule.keywords.some(kw => text.includes(kw))) return rule.name;
+            }
+            return 'Other';
+        }
+
+        // Assign sub-bucket to each issue
+        issues.forEach(i => { i.subBucket = getSubBucket(i); });
+
+        // Count issues by category
+        const categoryCounts = {};
+        issues.forEach(issue => {
+            categoryCounts[issue.category] = (categoryCounts[issue.category] || 0) + 1;
+        });
+
+        let currentCategory = 'All';
+
+        // Initialize dashboard
+        function initDashboard() {
+            renderCategoryBars();
+            renderFilterButtons();
+            renderIssues(issues);
+            updateTopCategory();
+        }
+
+        function renderCategoryBars() {
+            const container = document.getElementById('categoryBars');
+            const maxCount = Math.max(...Object.values(categoryCounts));
+
+            Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([category, count]) => {
+                    const percentage = (count / maxCount) * 100;
+                    const color = categoryColors[category];
+
+                    const barHtml = `
+                        <div class="category-bar" style="cursor:pointer;" onclick="filterByCategory('${category}')">
+                            <div class="category-label">${category}</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" style="width: ${percentage}%; background: ${color};">
+                                    ${count > 0 ? count : ''}
+                                </div>
+                            </div>
+                            <div class="bar-count">${count}</div>
+                        </div>
+                    `;
+                    container.innerHTML += barHtml;
+                });
+        }
+
+        function renderFilterButtons() {
+            const container = document.getElementById('filterButtons');
+            container.innerHTML = '<button class="filter-btn active" onclick="filterByCategory(\'All\')">All Issues</button>';
+
+            Object.keys(categoryCounts)
+                .sort((a, b) => categoryCounts[b] - categoryCounts[a])
+                .forEach(category => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    btn.textContent = category;
+                    btn.onclick = () => filterByCategory(category);
+                    container.appendChild(btn);
+                });
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === category || (category === 'All' && btn.textContent === 'All Issues'));
+            });
+
+            // Clear search
+            document.getElementById('searchBox').value = '';
+
+            if (category === 'All') {
+                hideSubBucketBreakdown();
+                renderIssues(issues);
+            } else {
+                const filtered = issues.filter(i => i.category === category);
+                showSubBucketBreakdown(category, filtered);
+                renderIssuesGrouped(filtered, category);
+            }
+        }
+
+        function showSubBucketBreakdown(category, filtered) {
+            const el = document.getElementById('subBucketBreakdown');
+            const color = categoryColors[category];
+
+            // Count sub-buckets
+            const sbCounts = {};
+            filtered.forEach(i => { sbCounts[i.subBucket] = (sbCounts[i.subBucket] || 0) + 1; });
+            const sorted = Object.entries(sbCounts).sort((a,b) => b[1] - a[1]);
+            const maxSb = sorted[0][1];
+
+            let barsHtml = sorted.map(([name, count]) => {
+                const pct = (count / maxSb) * 100;
+                const repeatTag = count >= 3 ? `<span class="sb-repeat-tag">Recurring (${count}x)</span>` : (count >= 2 ? `<span class="sb-repeat-tag" style="background:rgba(234,179,8,0.2);color:#eab308;">Repeated (${count}x)</span>` : '');
+                return `
+                    <div class="sb-mini-bar">
+                        <div class="sb-label">${name} ${repeatTag}</div>
+                        <div class="sb-bar-wrap">
+                            <div class="sb-bar-fill" style="width:${pct}%;background:${color};">${count > 2 ? count : ''}</div>
+                        </div>
+                        <div class="sb-bar-num">${count}</div>
+                    </div>`;
+            }).join('');
+
+            el.innerHTML = `
+                <h3><span class="cat-dot" style="background:${color};"></span>${category} — Sub-Buckets</h3>
+                <div class="sb-mini-bars">${barsHtml}</div>
+            `;
+            el.style.display = 'block';
+        }
+
+        function hideSubBucketBreakdown() {
+            document.getElementById('subBucketBreakdown').style.display = 'none';
+        }
+
+        function renderIssuesGrouped(filtered, category) {
+            const grid = document.getElementById('issuesGrid');
+            const noResults = document.getElementById('noResults');
+            grid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                noResults.style.display = 'block';
+                document.getElementById('displayCount').textContent = '0';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            document.getElementById('displayCount').textContent = filtered.length;
+
+            const color = categoryColors[category];
+
+            // Group by sub-bucket
+            const groups = {};
+            filtered.forEach(i => {
+                if (!groups[i.subBucket]) groups[i.subBucket] = [];
+                groups[i.subBucket].push(i);
+            });
+
+            // Sort groups by count desc
+            const sortedGroups = Object.entries(groups).sort((a,b) => b[1].length - a[1].length);
+
+            sortedGroups.forEach(([sbName, sbIssues], idx) => {
+                const repeatTag = sbIssues.length >= 3 ? `<span class="sb-repeat-tag">Recurring ${sbIssues.length}x</span>` : (sbIssues.length >= 2 ? `<span class="sb-repeat-tag" style="background:rgba(234,179,8,0.2);color:#eab308;">Repeated ${sbIssues.length}x</span>` : '');
+                const expanded = idx < 3; // expand top 3 by default
+
+                // Sub-bucket section header
+                const sectionId = 'sb-' + idx;
+                const headerHtml = `
+                    <div class="sub-bucket-section">
+                        <div class="sub-bucket-header ${expanded ? 'expanded' : ''}" onclick="toggleSubBucket('${sectionId}', this)">
+                            <span class="sb-icon">▶</span>
+                            <span class="sb-name">${sbName}</span>
+                            ${repeatTag}
+                            <span class="sb-count" style="background:${color};">${sbIssues.length}</span>
+                        </div>
+                        <div class="sub-bucket-cards ${expanded ? '' : 'collapsed'}" id="${sectionId}">
+                            ${sbIssues.map(issue => renderCardHtml(issue)).join('')}
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += headerHtml;
+            });
+        }
+
+        function toggleSubBucket(id, headerEl) {
+            const cards = document.getElementById(id);
+            cards.classList.toggle('collapsed');
+            headerEl.classList.toggle('expanded');
+        }
+
+        function renderCardHtml(issue) {
+            const color = categoryColors[issue.category];
+            const ts_without_dot = issue.ts.replace('.', '');
+            const slackLink = `https://stablemoneyworkspace.slack.com/archives/C080NA28SDQ/p${ts_without_dot}`;
+            return `
+                <div class="issue-card">
+                    <div class="issue-header">
+                        <span class="issue-date">${issue.date}</span>
+                        <span class="category-badge" style="background: ${color};">${issue.category}</span>
+                    </div>
+                    <div class="issue-title">${issue.title}</div>
+                    <div class="issue-description">${issue.description}</div>
+                    <div class="issue-footer">
+                        <span class="issue-author">By ${issue.author}</span>
+                        <a href="${slackLink}" target="_blank" class="slack-link">View in Slack</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderIssues(issuesToRender) {
+            const grid = document.getElementById('issuesGrid');
+            const noResults = document.getElementById('noResults');
+
+            grid.innerHTML = '';
+            hideSubBucketBreakdown();
+
+            if (issuesToRender.length === 0) {
+                noResults.style.display = 'block';
+                document.getElementById('displayCount').textContent = '0';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            document.getElementById('displayCount').textContent = issuesToRender.length;
+
+            issuesToRender.forEach(issue => {
+                grid.innerHTML += renderCardHtml(issue);
+            });
+        }
+
+        function updateTopCategory() {
+            const topCat = Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1])[0][0];
+            document.getElementById('topCategory').textContent = topCat.split(' ')[0];
+        }
+
+        document.getElementById('searchBox').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+
+            if (!query) {
+                if (currentCategory === 'All') {
+                    renderIssues(issues);
+                } else {
+                    const filtered = issues.filter(i => i.category === currentCategory);
+                    renderIssuesGrouped(filtered, currentCategory);
+                    showSubBucketBreakdown(currentCategory, filtered);
+                }
+                return;
+            }
+
+            const base = currentCategory === 'All' ? issues : issues.filter(i => i.category === currentCategory);
+            const filtered = base.filter(issue =>
+                issue.description.toLowerCase().includes(query) ||
+                issue.author.toLowerCase().includes(query) ||
+                issue.title.toLowerCase().includes(query) ||
+                issue.subBucket.toLowerCase().includes(query)
+            );
+
+            if (currentCategory !== 'All' && filtered.length > 0) {
+                renderIssuesGrouped(filtered, currentCategory);
+            } else {
+                hideSubBucketBreakdown();
+                renderIssues(filtered);
+            }
+        });
+
+        initDashboard();
+    </script>
+</body>
+</html>
